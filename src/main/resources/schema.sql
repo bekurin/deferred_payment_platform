@@ -35,12 +35,15 @@ CREATE TABLE corporation
 
 CREATE TABLE billing_account
 (
-    id              BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '결제 계정 고유 ID',
-    user_id         BIGINT COMMENT '사용자 ID',
-    corporation_id  BIGINT COMMENT '법인 사용자 ID',
-    billing_address VARCHAR(255) COMMENT '청구 주소',
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '레코드 생성 시각',
-    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '레코드 수정 시각',
+    id               BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '결제 계정 고유 ID',
+    user_id          BIGINT COMMENT '사용자 ID',
+    corporation_id   BIGINT COMMENT '법인 사용자 ID',
+    billing_address  VARCHAR(255) NOT NULL COMMENT '청구 주소',
+    card_number      VARCHAR(31)  NOT NULL COMMENT '카드 번호',
+    card_expiry_date DATE         NOT NULL COMMENT '카드 만료 일자',
+    card_csv         VARCHAR(15)  NOT NULL COMMENT '카드 csv 번호',
+    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '레코드 생성 시각',
+    updated_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '레코드 수정 시각',
     FOREIGN KEY (user_id) REFERENCES user (id),
     FOREIGN KEY (corporation_id) REFERENCES corporation (id)
 ) COMMENT ='결제 계정 정보 테이블';
@@ -51,8 +54,8 @@ CREATE TABLE Transaction
     user_id           BIGINT COMMENT '사용자 ID',
     corporate_user_id BIGINT COMMENT '법인 사용자 ID',
     amount            DECIMAL(10, 2) NOT NULL COMMENT '거래 금액',
-    transaction_date  DATE           NOT NULL COMMENT '거래 예정 금액',
-    status            VARCHAR(50) COMMENT '거래 상태',
+    transaction_date DATE        NOT NULL COMMENT '거래 예정 날짜',
+    status           VARCHAR(50) NOT NULL COMMENT '거래 상태',
     created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '레코드 생성 시각',
     updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '레코드 수정 시각',
     FOREIGN KEY (user_id) REFERENCES user (id),
@@ -61,15 +64,11 @@ CREATE TABLE Transaction
 
 CREATE TABLE Payment
 (
-    id                BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '결제 고유 ID',
-    user_id           BIGINT COMMENT '사용자 ID',
-    corporate_user_id BIGINT COMMENT '법인 사용자 ID',
-    transaction_id    BIGINT COMMENT '거래 ID',
-    payment_date      DATE NOT NULL COMMENT '결제 날짜',
-    created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '레코드 생성 시각',
-    updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '레코드 수정 시각',
-    FOREIGN KEY (user_id) REFERENCES user (id),
-    FOREIGN KEY (corporate_user_id) REFERENCES corporate_user (id),
+    id             BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '결제 고유 ID',
+    transaction_id BIGINT COMMENT '거래 ID',
+    payment_date   DATE NOT NULL COMMENT '결제 날짜',
+    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '레코드 생성 시각',
+    updated_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '레코드 수정 시각',
     FOREIGN KEY (transaction_id) REFERENCES Transaction (id)
 ) COMMENT ='결제 정보 테이블';
 
@@ -77,11 +76,9 @@ CREATE TABLE Ledger
 (
     id             BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '원장 항목 고유 ID',
     transaction_id BIGINT COMMENT '거래 ID',
-    payment_id     BIGINT COMMENT '결제 ID',
     amount         DECIMAL(10, 2) NOT NULL COMMENT '금액',
     type           VARCHAR(50)    NOT NULL COMMENT '항목 유형 (차변/대변)',
     created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '레코드 생성 시각',
     updated_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '레코드 수정 시각',
-    FOREIGN KEY (transaction_id) REFERENCES Transaction (id),
-    FOREIGN KEY (payment_id) REFERENCES Payment (id)
+    FOREIGN KEY (transaction_id) REFERENCES Transaction (id)
 ) COMMENT ='원장 항목 테이블';
