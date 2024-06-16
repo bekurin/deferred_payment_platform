@@ -31,18 +31,21 @@ class Corporation(
     var corporateUsers: MutableList<CorporateUser> = mutableListOf()
         protected set
 
-    fun registerCorporateUser(corporateUser: CorporateUser) {
-        if (canAddCorporateUser(corporateUser).not()) {
+    fun registerCorporateUser(corporateUserInfo: CorporateUserInfo): CorporateUser {
+        if (canAddCorporateUser(corporateUserInfo).not()) {
             throw IllegalArgumentException()
         }
-
-        if (corporateUsers.contains(corporateUser).not()) {
-            corporateUsers.add(corporateUser)
-        }
+        return CorporateUser(
+            name = corporateUserInfo.name,
+            email = corporateUserInfo.email,
+            phoneNumber = corporateUserInfo.phoneNumber,
+            corporation = this,
+            creditLimit = corporateUserInfo.creditLimit
+        )
     }
 
-    private fun canAddCorporateUser(corporateUser: CorporateUser): Boolean {
-        val totalCreditLimit = corporateUsers.sumOf { it.creditLimit } + corporateUser.creditLimit
+    private fun canAddCorporateUser(corporateUserInfo: CorporateUserInfo): Boolean {
+        val totalCreditLimit = corporateUsers.sumOf { it.creditLimit } + corporateUserInfo.creditLimit
         return totalCreditLimit <= creditLimit
     }
 
