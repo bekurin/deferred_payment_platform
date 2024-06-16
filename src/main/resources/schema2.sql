@@ -82,3 +82,85 @@ CREATE TABLE Ledger
     updated_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '레코드 수정 시각',
     FOREIGN KEY (transaction_id) REFERENCES Transaction (id)
 ) COMMENT ='원장 항목 테이블';
+
+######
+create table billing_account
+(
+    card_expiry_date date,
+    corporation_id   bigint,
+    created_at       timestamp(6) not null,
+    id               bigint primary key auto_increment,
+    updated_at       timestamp(6) not null,
+    user_id          bigint,
+    billing_address  varchar(255),
+    card_csv         varchar(255),
+    card_number      varchar(255),
+    primary key (id)
+);
+create table corporate_user
+(
+    credit_limit   numeric(38, 2) not null,
+    corporation_id bigint,
+    created_at     timestamp(6)   not null,
+    id             bigint primary key auto_increment,
+    updated_at     timestamp(6)   not null,
+    email          varchar(255)   not null,
+    name           varchar(255)   not null,
+    phone_number   varchar(255)   not null,
+    primary key (id)
+);
+create table corporation
+(
+    credit_limit        numeric(38, 2) not null,
+    outstanding_balance numeric(38, 2) not null,
+    created_at          timestamp(6)   not null,
+    id                  bigint primary key auto_increment,
+    updated_at          timestamp(6)   not null,
+    name                varchar(255)   not null,
+    primary key (id)
+);
+create table individual_user
+(
+    credit_limit        numeric(38, 2) not null,
+    outstanding_balance numeric(38, 2) not null,
+    created_at          timestamp(6)   not null,
+    id                  bigint primary key auto_increment,
+    updated_at          timestamp(6)   not null,
+    email               varchar(255)   not null,
+    name                varchar(255)   not null,
+    phone_number        varchar(255)   not null,
+    primary key (id)
+);
+create table ledger
+(
+    amount         numeric(38, 2) not null,
+    type           tinyint        not null check (type between 0 and 1),
+    created_at     timestamp(6)   not null,
+    deleted_at     timestamp(6)   not null,
+    id             bigint primary key auto_increment,
+    transaction_id bigint,
+    updated_at     timestamp(6)   not null,
+    primary key (id)
+);
+create table payment
+(
+    payment_date   date         not null,
+    created_at     timestamp(6) not null,
+    id             bigint primary key auto_increment,
+    transaction_id bigint unique,
+    updated_at     timestamp(6) not null,
+    primary key (id)
+);
+create table transaction
+(
+    amount             numeric(38, 2) not null,
+    status             tinyint check (status between 0 and 3),
+    transaction_date   date           not null,
+    billing_account_id bigint,
+    corporate_user_id  bigint,
+    created_at         timestamp(6)   not null,
+    id                 bigint primary key auto_increment,
+    updated_at         timestamp(6)   not null,
+    user_id            bigint,
+    primary key (id)
+)
