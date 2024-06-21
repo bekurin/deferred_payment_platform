@@ -16,6 +16,21 @@ class User(
     creditLimit: BigDecimal,
     outstandingBalance: BigDecimal = BigDecimal.ZERO,
 ) : BaseEntity() {
+    init {
+        if (name.isBlank()) {
+            throw IllegalArgumentException()
+        }
+        if (email.isBlank()) {
+            throw IllegalArgumentException()
+        }
+        if (phoneNumber.isBlank()) {
+            throw IllegalArgumentException()
+        }
+        if (creditLimit <= BigDecimal.ZERO) {
+            throw IllegalArgumentException()
+        }
+    }
+
     @Column(name = "name", nullable = false)
     var name: String = name
         protected set
