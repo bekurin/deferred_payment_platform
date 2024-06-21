@@ -1,9 +1,9 @@
 package deferred.payment.platform.corporation.application
 
 import deferred.payment.platform.corporation.domain.Corporation
-import deferred.payment.platform.corporation.domain.CorporationRepository
 import deferred.payment.platform.corporation.dto.CorporationCreateRequest
 import deferred.payment.platform.corporation.dto.CorporationResponse
+import deferred.payment.platform.corporation.infrastructure.CorporationRepository
 import deferred.payment.platform.util.Random
 import deferred.payment.platform.util.UnitTestBase
 import org.assertj.core.api.SoftAssertions

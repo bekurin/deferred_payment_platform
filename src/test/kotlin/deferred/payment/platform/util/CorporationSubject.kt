@@ -1,5 +1,6 @@
 package deferred.payment.platform.util
 
+import deferred.payment.platform.corporation.domain.CorporateUser
 import deferred.payment.platform.corporation.domain.Corporation
 import java.math.BigDecimal
 
@@ -9,14 +10,13 @@ object CorporationSubject {
         name: String = Random.createRandomName(),
         creditLimit: BigDecimal = Random.createRandomPositiveBigDecimal(),
         outstandingBalance: BigDecimal = Random.createRandomPositiveBigDecimal(),
+        corporateUsers: List<CorporateUser> = emptyList()
     ): Corporation {
-        return Corporation(
+        val corporation = Corporation(
             name = name,
             creditLimit = creditLimit,
             outstandingBalance = outstandingBalance,
         )
-            .also {
-                it.id = id
-            }
+        return corporation
     }
 }

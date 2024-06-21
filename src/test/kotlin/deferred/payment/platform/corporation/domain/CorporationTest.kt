@@ -2,9 +2,12 @@ package deferred.payment.platform.corporation.domain
 
 import deferred.payment.platform.util.CorporationSubject
 import deferred.payment.platform.util.Random
+import deferred.payment.platform.util.TestConstant
 import deferred.payment.platform.util.TransactionSubject
 import java.math.BigDecimal
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.SoftAssertions
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -62,5 +65,58 @@ class CorporationTest {
 
         // then
         assertDoesNotThrow(action)
+    }
+
+    @Nested
+    inner class `기업 회원을 생성할 때` {
+        @Test
+        fun `기업의 신용 한도가 초과되면 생성에 실패한다`() {
+            // given
+            val corporationCreditLimit = Random.createRandomPositiveBigDecimal()
+            val corporation = CorporationSubject.create(
+                creditLimit = corporationCreditLimit,
+            )
+            val corporateUserInfo = CorporateUserInfo(
+                name = Random.createRandomName(),
+                email = Random.createRandomEmail(),
+                phoneNumber = Random.createRandomPhoneNumber(),
+                creditLimit = corporationCreditLimit + BigDecimal.ONE
+            )
+
+            // when
+            val action = { corporation.registerCorporateUser(corporateUserInfo) }
+
+            // then
+            assertThrows<IllegalArgumentException> { action() }
+        }
+
+        @Test
+        fun `기업의 신용 한도를 초과하지 않는다면 기업 회원 정보를 반환한다`() {
+            // given
+            val corporationCreditLimit = Random.createRandomPositiveBigDecimal()
+            val corporation = CorporationSubject.create(
+                creditLimit = corporationCreditLimit,
+            )
+            val corporateUserInfo = CorporateUserInfo(
+                name = Random.createRandomName(),
+                email = Random.createRandomEmail(),
+                phoneNumber = Random.createRandomPhoneNumber(),
+                creditLimit = BigDecimal.ONE
+            )
+
+            // when
+            val corporateUser = corporation.registerCorporateUser(corporateUserInfo)
+
+            // then
+            SoftAssertions.assertSoftly { softly ->
+                softly.assertThat(corporateUser.creditLimit).isEqualTo(corporateUserInfo.creditLimit)
+                softly.assertThat(corporateUser.name).isEqualTo(corporateUserInfo.name)
+                softly.assertThat(corporateUser.phoneNumber).isEqualTo(corporateUserInfo.phoneNumber)
+                softly.assertThat(corporateUser.email).isEqualTo(corporateUserInfo.email)
+                softly.assertThat(corporateUser.corporation).usingRecursiveAssertion()
+                    .ignoringFields(*TestConstant.IGNORE_FIELDS.toTypedArray())
+                    .isEqualTo(corporation)
+            }
+        }
     }
 }
